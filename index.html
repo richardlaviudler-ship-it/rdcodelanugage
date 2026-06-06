@@ -1,56 +1,20 @@
 <!DOCTYPE html>
-
-<script src="tokentype.js"></script>
-<script src="script.js"></script>
-
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>rdcodelanugage Studio</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>rdcodelanugage Studio</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="ide-container">
-    
-    <div class="sidebar">
-      <h3>Explorer</h3>
-      <ul class="file-list">
-        <li class="active-file">📄 main.rdc</li>
-      </ul>
-    </div>
-
-    <div class="workspace">
-      <div class="editor-header">
-        <span class="tab">main.rdc</span>
-        <button id="run-btn" class="run-button">Run Code ▶</button>
-      </div>
-
-      <textarea id="code-editor" spellcheck="false" placeholder="Write rdcodelanugage here...">score = 100 + 50</textarea>
-
-      <div class="terminal">
-        <div class="terminal-header">Terminal Output</div>
-        <pre id="terminal-output">> System Ready...</pre>
-      </div>
-    </div>
-
-    <div class="ai-panel">
-      <div class="ai-header">
-        🤖 AI Assistant
-      </div>
-      <div id="chat-history" class="chat-history">
-        <div class="message ai-message">
-          Hello! I am your rdcodelanugage AI agent. How can I help you code today?
+    <div class="ide-container">
+        <div id="code-editor-wrapper">
+            <textarea id="code-editor">score = 100 + 50</textarea>
+            <button id="run-btn">Run Code</button>
         </div>
-      </div>
-      <div class="ai-input-area">
-        <textarea id="ai-input" placeholder="Ask the agent a question..."></textarea>
-        <button id="ai-send-btn">Send</button>
-      </div>
+        <pre id="terminal-output"></pre>
     </div>
 
-  </div>
-
-  <script src="script.js"></script>
+    <script src="tokentype.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
