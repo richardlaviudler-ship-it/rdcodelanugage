@@ -102,3 +102,34 @@ aiInput.addEventListener("keydown", (e) => {
         aiSendBtn.click();
     }
 });
+
+// =========================
+// 🧪 LIVE PREVIEW ENGINE
+// =========================
+
+function updatePreview(code) {
+    const frame = document.getElementById("preview-frame");
+
+    // If HTML is detected → render in iframe
+    if (code.includes("<html") || code.includes("<div") || code.includes("<script")) {
+
+        const doc = frame.contentDocument || frame.contentWindow.document;
+        doc.open();
+        doc.write(code);
+        doc.close();
+
+    } else {
+        // fallback preview
+        const doc = frame.contentDocument || frame.contentWindow.document;
+        doc.open();
+        doc.write(`
+            <html>
+              <body style="font-family: Arial;">
+                <h3>Preview Mode</h3>
+                <p>${code}</p>
+              </body>
+            </html>
+        `);
+        doc.close();
+    }
+}
