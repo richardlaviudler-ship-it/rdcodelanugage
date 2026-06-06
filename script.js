@@ -133,3 +133,13 @@ function updatePreview(code) {
         doc.close();
     }
 }
+
+runBtn.addEventListener("click", () => {
+    const code = document.getElementById("code-editor").value;
+
+    const result = runCode(code);
+    output.innerText = result;
+
+    // 🧪 NEW: update preview
+    updatePreview(code);
+});
