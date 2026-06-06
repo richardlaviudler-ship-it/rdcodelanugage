@@ -1,57 +1,22 @@
-// The Lexer logic
-function tokenize(sourceCode) {
-  const tokens = [];
-  let current = 0;
+// ... (Your existing tokenize function remains here) ...
 
-  while (current < sourceCode.length) {
-    let char = sourceCode[current];
-
-    if (/\s/.test(char)) { current++; continue; }
-    if (char === "=") { tokens.push({ type: TokenType.EQUALS, value: "=" }); current++; continue; }
-    if (char === "+") { tokens.push({ type: TokenType.PLUS, value: "+" }); current++; continue; }
-
-    // Numbers
-    if (/[0-9]/.test(char)) {
-      let num = "";
-      while (current < sourceCode.length && /[0-9]/.test(sourceCode[current])) {
-        num += sourceCode[current];
-        current++;
-      }
-      tokens.push({ type: TokenType.NUMBER, value: num });
-      continue;
-    }
-
-    // Words (Identifiers or Keywords)
-    if (/[a-zA-Z]/.test(char)) {
-      let text = "";
-      while (current < sourceCode.length && /[a-zA-Z0-9_]/.test(sourceCode[current])) {
-        text += sourceCode[current];
-        current++;
-      }
-      // Check for our new keyword "say"
-      if (text === "say") {
-        tokens.push({ type: TokenType.SAY, value: "say" });
-      } else {
-        tokens.push({ type: TokenType.IDENTIFIER, value: text });
-      }
-      continue;
-    }
-
-    throw new Error(`Unexpected character: '${char}'`);
-  }
-
-  tokens.push({ type: TokenType.EOF, value: "EOF" });
-  return tokens;
+// --- AI Agent logic to inject code ---
+function injectCodeIntoEditor(newCode) {
+    const editor = document.getElementById("code-editor");
+    editor.value = newCode; // This puts the code into your Editor
+    console.log("Agent injected new code into editor.");
 }
 
-// Event Listener for the Run Button
-document.getElementById("run-btn").addEventListener("click", () => {
-  const code = document.getElementById("code-editor").value;
-  const output = document.getElementById("terminal-output");
-  try {
-    const tokens = tokenize(code);
-    output.innerText = JSON.stringify(tokens, null, 2);
-  } catch (e) {
-    output.innerText = e.message;
-  }
+// In your AI send button logic:
+aiSendBtn.addEventListener("click", () => {
+    const userText = aiInput.value.toLowerCase();
+    addMessage(userText, "user");
+    aiInput.value = "";
+
+    // If you ask the AI for code, it generates it and injects it!
+    if (userText.includes("generate")) {
+        const generatedCode = "score = 100 + 50\nsay score";
+        injectCodeIntoEditor(generatedCode);
+        addMessage("I have generated and injected the code into your editor!", "ai");
+    }
 });
