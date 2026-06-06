@@ -1,145 +1,144 @@
 // =========================
-// RDCODE LAB V1.2 SAFE CORE
+// RDCODE LAB V1.5 CORE ENGINE
 // =========================
 
+// -------------------------
+// UI ELEMENTS
+// -------------------------
 const runBtn = document.getElementById("run-btn");
 const output = document.getElementById("terminal-output");
-
-const aiSendBtn = document.getElementById("ai-send-btn");
-const aiInput = document.getElementById("ai-input");
-const chatHistory = document.getElementById("chat-history");
+const editor = document.getElementById("code-editor");
 
 // -------------------------
-// CODE RUNNER (SAFE MODE)
+// SAFE JS RUNNER
 // -------------------------
-function runCode(code) {
+function runJS(code) {
     try {
-        // SAFE execution (no dangerous Function/eval)
-        // Only simple math + expressions allowed in V1.2
+        return Function('"use strict"; return (' + code + ')')();
+    } catch (e) {
+        return "JS Error: " + e.message;
+    }
+}
 
-        if (code.includes("alert") || code.includes("fetch")) {
-            return "Blocked: unsafe operation";
+// -------------------------
+// RDCODE ENGINE (V1.5)
+// -------------------------
+function runRDCODE(code) {
+    const lines = code.split("\n");
+    let memory = {};
+
+    for (let line of lines) {
+        line = line.trim();
+
+        if (!line) continue;
+
+        // let x = 10
+        if (line.startsWith("let ")) {
+            let [key, value] = line.replace("let ", "").split("=");
+            memory[key.trim()] = eval(value);
         }
 
-        const result = Function('"use strict"; return (' + code + ')')();
-        return result === undefined ? "Executed" : result;
+        // print(x)
+        else if (line.startsWith("print(")) {
+            let inside = line.slice(6, -1);
+            let result = eval(inside);
+            console.log(result);
+            return result;
+        }
 
-    } catch (err) {
-        return "Error: " + err.message;
+        // direct assignment
+        else if (line.includes("=")) {
+            let [key, value] = line.split("=");
+            memory[key.trim()] = eval(value);
+        }
     }
+
+    return memory;
 }
 
+// -------------------------
+// CODE RUN CONTROLLER
+// -------------------------
 runBtn.addEventListener("click", () => {
-    const code = document.getElementById("code-editor").value;
-    const result = runCode(code);
-    output.innerText = result;
+    const code = editor.value;
+
+    let result;
+
+    // detect RDCODE
+    if (code.includes("let ") || code.includes("print(")) {
+        result = runRDCODE(code);
+    } else {
+        result = runJS(code);
+    }
+
+    output.innerText =
+        typeof result === "object"
+            ? JSON.stringify(result, null, 2)
+            : result;
+
+    updatePreview(code);
 });
 
 // -------------------------
-// AI CHAT SYSTEM
+// LIVE PREVIEW ENGINE
 // -------------------------
-function addMessage(text, type) {
-    const div = document.createElement("div");
-    div.className = type;
-    div.innerText = (type === "user" ? "You: " : "Agent: ") + text;
-    chatHistory.appendChild(div);
-}
-
-// Simple AI brain (offline V1)
-function agentBrain(input) {
-
-    const text = input.toLowerCase();
-
-    if (text.includes("hello")) {
-        return "Hello 👋 I am RDCODE Agent.";
-    }
-
-    if (text.includes("run")) {
-        return "Press the RUN button to execute code.";
-    }
-
-    if (text.includes("error")) {
-        return "Check brackets, syntax, or missing symbols.";
-    }
-
-    if (text.includes("rdcode")) {
-        return "RDCODE detected ⚡ (custom language mode coming soon)";
-    }
-
-    if (text.includes("help")) {
-        return "Try: 'run code', 'fix error', or 'generate code'";
-    }
-
-    return "I am ready. Ask me to generate or explain code.";
-}
-
-// Chat handler
-aiSendBtn.addEventListener("click", () => {
-
-    const userText = aiInput.value;
-    if (!userText) return;
-
-    addMessage(userText, "user");
-    aiInput.value = "";
-
-    const response = agentBrain(userText);
-
-    setTimeout(() => {
-        addMessage(response, "agent");
-    }, 300);
-});
-
-// -------------------------
-// MINI CODE GENERATOR
-// -------------------------
-function injectCode(code) {
-    document.getElementById("code-editor").value = code;
-}
-
-// quick command support
-aiInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-        aiSendBtn.click();
-    }
-});
-
-// =========================
-// 🧪 LIVE PREVIEW ENGINE
-// =========================
-
 function updatePreview(code) {
     const frame = document.getElementById("preview-frame");
 
-    // If HTML is detected → render in iframe
-    if (code.includes("<html") || code.includes("<div") || code.includes("<script")) {
+    if (!frame) return;
 
-        const doc = frame.contentDocument || frame.contentWindow.document;
+    const doc = frame.contentDocument || frame.contentWindow.document;
+
+    if (code.includes("<html") || code.includes("<body")) {
         doc.open();
         doc.write(code);
         doc.close();
-
     } else {
-        // fallback preview
-        const doc = frame.contentDocument || frame.contentWindow.document;
         doc.open();
         doc.write(`
             <html>
-              <body style="font-family: Arial;">
-                <h3>Preview Mode</h3>
-                <p>${code}</p>
-              </body>
+                <body style="font-family: Arial; padding: 10px;">
+                    <h3>RDCODE Preview</h3>
+                    <pre>${code}</pre>
+                </body>
             </html>
         `);
         doc.close();
     }
 }
 
-runBtn.addEventListener("click", () => {
-    const code = document.getElementById("code-editor").value;
+// -------------------------
+// SIMPLE AI AGENT (OFFLINE)
+// -------------------------
+const aiSendBtn = document.getElementById("ai-send-btn");
+const aiInput = document.getElementById("ai-input");
+const chatHistory = document.getElementById("chat-history");
 
-    const result = runCode(code);
-    output.innerText = result;
+function addMsg(text, who) {
+    const div = document.createElement("div");
+    div.textContent = (who === "user" ? "You: " : "Agent: ") + text;
+    chatHistory.appendChild(div);
+}
 
-    // 🧪 NEW: update preview
-    updatePreview(code);
+function agentBrain(input) {
+    input = input.toLowerCase();
+
+    if (input.includes("hello")) return "Hi 👋 I am RDCODE V1.5 Agent";
+    if (input.includes("run")) return "Click RUN to execute code.";
+    if (input.includes("rdcode")) return "RDCODE mode active ⚡";
+    if (input.includes("help")) return "Try: write code, run code, or ask explanation";
+
+    return "Ready. I can assist with your code.";
+}
+
+aiSendBtn.addEventListener("click", () => {
+    const text = aiInput.value;
+    if (!text) return;
+
+    addMsg(text, "user");
+    aiInput.value = "";
+
+    setTimeout(() => {
+        addMsg(agentBrain(text), "agent");
+    }, 250);
 });
